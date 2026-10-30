@@ -1,0 +1,66 @@
+diff.astextplain.textconv=astextplain
+filter.lfs.clean=git-lfs clean -- %f
+filter.lfs.smudge=git-lfs smudge -- %f
+filter.lfs.process=git-lfs filter-process
+filter.lfs.required=true
+http.sslbackend=schannel
+core.autocrlf=true
+core.fscache=true
+core.symlinks=false
+pull.rebase=false
+credential.helper=manager
+credential.https://dev.azure.com.usehttppath=true
+init.defaultbranch=master
+core.editor="C:\Users\lenovo\AppData\Local\Programs\Microsoft VS Code\bin\code" --wait
+user.email=admin@stb.ac.id
+user.name=adminweb-stb
+http.sslverify=true
+core.repositoryformatversion=0
+core.filemode=false
+core.bare=false
+core.logallrefupdates=true
+core.symlinks=false
+core.ignorecase=true
+remote.origin.url=https://github.com/FzNAja/GAIL.git
+remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+branch.main.remote=origin
+branch.main.merge=refs/heads/main
+branch.main.vscode-merge-base=origin/main
+branch.AMZ.vscode-merge-base=origin/main
+  --bg: #f3efe2;
+  --sf: #fbf9f2;
+  --ink: #12281f;
+  --mu: #566459;
+  --g: #0b4a38;
+  --b: #b25a1c;
+  --lm: #d6e5bd;
+  --ln: #d9d3bf;
+  --on: #fbf9f2;
+  --fh: Montserrat, ui-sans-serif, system-ui, sans-serif;
+  --fb: Figtree, ui-sans-serif, system-ui, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1a14;
+    --sf: #13261d;
+    --ink: #eee9d8;
+    --mu: #a2b3a5;
+    --g: #8fd6a8;
+    --b: #e8905a;
+    --ln: #274034;
+    --on: #0c1a14;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1a14;
+  --sf: #13261d;
+  --ink: #eee9d8;
+  --mu: #a2b3a5;
+  --g: #8fd6a8;
+  --b: #e8905a;
+  --ln: #274034;
+  --on: #0c1a14;
+}

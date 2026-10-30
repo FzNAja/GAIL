@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NOL — Laboratorium Penelitian</title>
+    <meta
+      name="description"
+      content="Portofolio NOL, laboratorium penelitian di Jakarta. Proses, protokol, dan temuan dibaca di halaman yang sama."
+    />
+    <meta name="theme-color" content="#f3f3f1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#111111",
+              paper: "#f3f3f1",
+              muted: "#4a4a4a",
+              line: "#d4d4d0",
+              mist: "#c8c8c8",
+              fog: "#e6e6e3",
+            },
+            fontFamily: {
+              display: ["Fraunces", "Iowan Old Style", "Palatino", "serif"],
+              sans: ["IBM Plex Sans", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      html { scroll-behavior: smooth; color-scheme: light; }
+      body { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+      button:not(:disabled), [role="button"]:not(:disabled) { cursor: pointer; }
+      :focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+      ::selection { background: #111; color: #f3f3f1; }
+      section[id] { scroll-margin-top: 6.5rem; }
+      .display { font-family: Fraunces, Palatino, serif; font-weight: 500; font-size: clamp(2.7rem, 6.6vw, 5.6rem); line-height: 0.92; letter-spacing: -0.035em; }
+      .display-md { font-family: Fraunces, Palatino, serif; font-weight: 500; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.02; letter-spacing: -0.03em; }
+      .question { font-family: Fraunces, Palatino, serif; font-weight: 500; font-size: clamp(1.55rem, 2.5vw, 2.2rem); line-height: 1.16; letter-spacing: -0.02em; }
+      .index-mask { height: 0.82em; overflow: hidden; font-size: clamp(4.4rem, 8vw, 7.4rem); line-height: 0.82; }
+      .index-num { font-family: Fraunces, Palatino, serif; font-weight: 500; letter-spacing: -0.045em; }
+      .plate-grid { background-image: linear-gradient(to right, rgb(243 243 241 / 0.09) 1px, transparent 1px), linear-gradient(to bottom, rgb(243 243 241 / 0.09) 1px, transparent 1px); background-size: 32px 32px; }
+      .scope { position: relative; height: 2.75rem; overflow: hidden; container-type: size; border-top: 1px solid rgb(200 200 200 / 0.35); border-bottom: 1px solid rgb(200 200 200 / 0.35); background-image: repeating-linear-gradient(to right, rgb(200 200 200 / 0.45) 0 1px, transparent 1px 28px); }
+      .scan-line { position: absolute; top: 0; right: 0; left: 0; height: 1px; background: rgb(243 243 241 / 0.9); animation: scan 2.8s linear infinite; }
+      @keyframes scan { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(100cqh); opacity: 0; } }
+      .ticker-track { display: flex; width: max-content; animation: ticker 46s linear infinite; }
+      .ticker:hover .ticker-track { animation-play-state: paused; }
+      @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+      .rise { animation: rise 560ms cubic-bezier(0.16, 1, 0.3, 1); }
+      @keyframes rise { from { transform: translateY(100%); } to { transform: translateY(0); } }
+      .bar-fill { transform-origin: left center; animation: bar-in 760ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+      @keyframes bar-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+      .draw { transform-origin: left center; transition: transform 880ms cubic-bezier(0.16, 1, 0.3, 1); }
+      .fade-swap { transition: opacity 180ms ease, transform 180ms ease; }
+      .no-scrollbar { scrollbar-width: none; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .skip { position: absolute; top: 0.75rem; left: 0.75rem; z-index: 50; transform: translateY(-160%); background: #111; color: #f3f3f1; padding: 0.6rem 0.8rem; }
+      .skip:focus { transform: none; }
+      @media (min-width: 1024px) { .step-pane { min-height: 72vh; } }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .scan-line, .ticker-track, .rise, .bar-fill { animation: none; }
+        .bar-fill, .draw, .fade-swap { transform: none; transition: none; }
+      }
+    </style>
+  </head>
+  <body class="bg-paper font-sans text-ink">
+    <div id="app"></div>
+    <script>
+      const steps = [
+        { n: "01", title: "Pergi", lead: "Dua minggu di lokasi sebelum instrumen dianggap selesai.", body: "Tiga hari pertama tidak ada kuesioner. Kami mencatat jam bongkar, siapa yang bicara, dan apa yang tidak dikatakan. Salinan digital dibuat setelah catatan tangan, bukan sebaliknya.", notes: ["Peta lokasi digambar ulang oleh peneliti lapangan", "Asumsi awal dicoret di margin, tidak dihapus", "Tidak ada foto wajah di arsip"] },
+        { n: "02", title: "Satu pertanyaan", lead: "Kalau tidak bisa dijawab dengan ya, tidak, atau sebuah angka, pertanyaan itu belum siap.", body: "Kami membuang pertanyaan yang hanya bisa dijawab dengan kata sifat. Satu kajian memegang satu pertanyaan utama. Pertanyaan lain dicatat sebagai sampingan, bukan diselundupkan ke kesimpulan.", notes: ["Pertanyaan utama muat dalam dua baris", "Istilah diukur didefinisikan sebelum dihitung", "Yang tidak akan dijawab ditulis di halaman yang sama"] },
+        { n: "03", title: "Kunci protokol", lead: "Metode, sampel, dan cara membantah temuan dikunci sebelum data utama dikumpulkan.", body: "Perubahan setelah kunci tetap boleh, tetapi harus tertulis: tanggal, alasan, dan apa yang berubah pada angka. Protokol yang diam-diam diganti tidak kami hitung sebagai prosedur.", notes: ["Definisi operasional satu halaman", "Ukuran sampel dan yang dikecualikan", "Buku perubahan, bukan riwayat yang hilang"] },
+        { n: "04", title: "Sidang dalam", lead: "Temuan dibantah dulu oleh anggota tim yang tidak turun ke lapangan itu.", body: "Sidang tidak mencari gaya bahasa. Yang dicari: angka yang hanya bertahan karena pengecualian disembunyikan, atau kutipan yang dipilih karena terdengar rapi. Yang lolos baru boleh disebut hasil.", notes: ["Pengbantah tidak ikut menyusun draf pertama", "Keberatan yang ditolak tetap di lampiran", "Tidak ada hasil yang lahir di ruang suntingan"] },
+        { n: "05", title: "Terbit ganda", lead: "Laporan publik dan lampiran proses terbit bersama.", body: "Angka tanpa jalan menuju angka itu tidak kami hitung sebagai publikasi. Lampiran memuat protokol, perubahan, dan batas klaim. Ringkasan yang tidak bisa ditelusuri tidak diletakkan di muka.", notes: ["Batas klaim di halaman yang sama dengan temuan", "Lampiran protokol, bukan hanya grafik", "Kalimat yang menutupi ketidakpastian dipotong"] },
+      ];
+
+      const studies = [
+        { id: "pasar", code: "NOL-06", year: "2025", title: "Pasar Dingin", field: "Enam kota · 186 kios", duration: "14 bulan", status: "Terbit", question: "Seberapa cepat akses pendingin di pasar tradisional menyusut, dan siapa yang menanggung biayanya?", summary: "Kios dihitung satu per satu. Gudang dingin milik dinas yang kosong di luar jam kerja tidak dianggap sebagai akses. Yang diukur adalah es yang benar-benar sampai ke dagangan.", beats: [{ short: "Lapangan", note: "Dua minggu di enam pasar sebelum kuesioner final. Yang dicatat: jam es datang, siapa menitipkan sayur, dan kios yang sudah berhenti menyewa kulkas bersama." }, { short: "Tanya", note: "Berapa kios yang kehilangan akses pendingin sejak 2020, dan siapa yang menanggung biaya penggantinya?" }, { short: "Kunci", note: "Sampel 186 kios, definisi “kehilangan akses”, dan cara kalibrasi termometer dikunci pada 12 Maret 2025. Perubahan setelah tanggal itu masuk buku protokol." }, { short: "Sidang", note: "Angka 23% ditahan sampai kios yang memang tidak pernah punya es dipisahkan dari kios yang kehilangan akses. Gudang dinas yang kosong tidak dihitung sebagai akses." }, { short: "Batas", note: "Bukan peta nasional. Enam kota, pasar tradisional, bukan ritel modern, dan tidak mengukur mutu gizi." }], metrics: [{ value: "23%", label: "Kios kehilangan es", note: "Dalam empat tahun" }, { value: "1,8×", label: "Biaya es naik", note: "Sementara margin sayur turun" }, { value: "3", label: "Kota", note: "Gudang dinas kosong di luar jam kerja" }], series: { caption: "Persentase kios yang kehilangan akses es sejak 2020. Enam kota, pasar tradisional.", unit: "%", points: [{ label: "Medan", value: 31 }, { label: "Surabaya", value: 27 }, { label: "Makassar", value: 24 }, { label: "Semarang", value: 19 }, { label: "Bandung", value: 18 }, { label: "Jakarta", value: 14 }] }, objection: "Angka gabungan 23% menyembunyikan kota yang jatuh lebih cepat. Sidang dalam mewajibkan grafik per kota tetap di laporan utama, bukan dipindah ke lampiran.", limit: "Tidak berlaku untuk ritel modern, tidak memperkirakan kerugian rupiah nasional, dan tidak menilai mutu gizi." },
+        { id: "kalimat", code: "NOL-05", year: "2024", title: "Kalimat Panjang", field: "42 peraturan daerah", duration: "9 bulan", status: "Terbit", question: "Apakah dokumen kebijakan yang mengatur warga bisa dibaca oleh orang yang terkena dampaknya?", summary: "Setiap dokumen dibaca utuh. Yang dihitung bukan “kesan sulit”, melainkan panjang kalimat, ada tidaknya ringkasan, dan rujukan yang tidak dijelaskan.", beats: [{ short: "Lapangan", note: "Empat puluh dua perda dibaca utuh, bukan dari ringkasan berita. Penanda halaman dicatat ketika sebuah kalimat harus dibaca dua kali." }, { short: "Tanya", note: "Apakah dokumen yang mengatur warga bisa dibaca oleh orang yang terkena dampaknya, tanpa penerjemah hukum?" }, { short: "Kunci", note: "Satuan yang dikunci: kata per kalimat, ada atau tidaknya ringkasan, dan jumlah rujukan silang yang tidak dijelaskan. Perangkat hitung ditulis di lampiran." }, { short: "Sidang", note: "Keberatan utama: kalimat panjang belum tentu tidak sah. Yang dipertahankan hanya temuan keterbacaan, bukan penilaian hukum." }, { short: "Batas", note: "Tidak menilai apakah peraturannya benar. Hanya menilai apakah jalannya bisa diikuti saat dibaca sekali." }], metrics: [{ value: "38", label: "Kata", note: "Rata-rata dalam satu kalimat" }, { value: "42", label: "Perda", note: "Dibaca utuh, bukan dari kutipan" }, { value: "11", label: "Dokumen", note: "Tanpa ringkasan di muka" }], series: { caption: "Sebaran panjang kalimat pada 42 perda. Satuan: persen dari seluruh kalimat.", unit: "%", points: [{ label: "<15", value: 8 }, { label: "15–25", value: 14 }, { label: "26–40", value: 41 }, { label: ">40", value: 37 }] }, objection: "Panjang bukan ukuran sahih untuk kualitas hukum. Keberatan itu diterima. Laporan tidak menyebut perda mana yang “buruk”, hanya yang sulit diikuti saat dibaca sekali.", limit: "Bukan telaah legalitas. Tidak menyusun ulang naskah perda, dan tidak mengukur apakah warga setuju dengan isinya." },
+        { id: "jam", code: "NOL-03", year: "2022", title: "Jam Sepi", field: "8 puskesmas · 90 hari", duration: "11 bulan", status: "Terbit", question: "Apakah jam layanan bertemu dengan jam orang yang bekerja secara informal?", summary: "Log kedatangan dijajarkan dengan jam loket yang benar-benar berjalan, bukan dengan jam di papan pengumuman. Wawancara di luar gedung dipakai untuk membaca siapa yang datang pukul 17.", beats: [{ short: "Lapangan", note: "Delapan puskesmas, log kedatangan 90 hari, ditambah wawancara singkat di luar loket — warung, ojek, dan ruang tunggu." }, { short: "Tanya", note: "Apakah jam loket bertemu dengan jam orang yang bekerja secara informal?" }, { short: "Kunci", note: "“Jam optimal” didefinisikan sebelum perhitungan: loket buka, dokter ada, dan antrean di bawah ambang yang ditulis di protokol." }, { short: "Sidang", note: "Puncak pukul 17 sempat dianggap kesalahan catat. Log dijajarkan ulang per hari. Puncak itu tetap ada di enam dari delapan lokasi." }, { short: "Batas", note: "Bukan evaluasi mutu medis. Tidak menyimpulkan bahwa jam baru akan menyembuhkan antrean." }], metrics: [{ value: "61%", label: "Kunjungan", note: "Pekerja informal di luar jam optimal" }, { value: "8", label: "Puskesmas", note: "Log harian selama 90 hari" }, { value: "17", label: "Puncak kedua", note: "Hadir di enam dari delapan lokasi" }], series: { caption: "Sebaran kedatangan menurut blok jam. Satuan: persen dari seluruh kunjungan tercatat.", unit: "%", points: [{ label: "06–08", value: 11 }, { label: "08–11", value: 22 }, { label: "11–14", value: 18 }, { label: "14–17", value: 27 }, { label: "17–20", value: 22 }] }, objection: "Puncak sore sempat diduga antrean sisa, bukan kedatangan baru. Setelah log dipisah per kedatangan, puncak pukul 17 tetap berdiri.", limit: "Tidak menilai mutu pemeriksaan. Tidak cukup untuk menjadwalkan ulang satu kota." },
+        { id: "suara", code: "NOL-02", year: "2021", title: "Suara yang Sama", field: "1.240 aduan", duration: "8 bulan", status: "Terbit", question: "Pola keluhan apa yang berulang, tetapi tidak muncul di indikator resmi?", summary: "Aduan dikelompokkan setelah identitas dihapus. Satu aduan memegang satu pola utama. Indikator dinas dibandingkan belakangan, supaya kategori tidak meniru borang yang sudah ada.", beats: [{ short: "Lapangan", note: "Aduan infrastruktur dibaca dari arsip terbuka dan salinan yang diserahkan warga. Nama, nomor rumah, dan identitas lain dihapus sebelum dikelompokkan." }, { short: "Tanya", note: "Pola keluhan apa yang berulang, tetapi tidak muncul sebagai indikator resmi?" }, { short: "Kunci", note: "Satu aduan, satu pola utama. Pola ganda dicatat di samping, tidak didobelkan agar grafik terlihat penuh." }, { short: "Sidang", note: "Empat pola ditahan sampai pengelompokan diulang oleh anggota yang tidak membuat kategori awal. Dua kategori dilebur karena hanya berbeda nama." }, { short: "Batas", note: "Bukan survei opini. Tidak ada nama yang disimpan, dan tidak bisa dipakai untuk menunjuk individu." }], metrics: [{ value: "1.240", label: "Aduan", note: "Setelah identitas dihapus" }, { value: "4", label: "Pola", note: "Yang tidak punya indikator resmi" }, { value: "0", label: "Nama", note: "Yang disimpan di arsip kerja" }], series: { caption: "Empat pola utama. Satu aduan dihitung sekali. Jumlah mengikuti arsip yang sudah dianonimkan.", unit: "", points: [{ label: "Jalan", value: 422 }, { label: "Air", value: 335 }, { label: "Lampu", value: 261 }, { label: "Sampah", value: 222 }] }, objection: "Dua kategori awal hanya berbeda nama. Sidang melebur keduanya. Angka akhir lebih kecil, dan itu yang diterbitkan.", limit: "Bukan jajak pendapat. Tidak bisa ditelusuri ke pengadu, dan tidak mengukur apakah aduan ditindaklanjuti." },
+      ];
+
+      const people = [
+        { initials: "SW", name: "Sari Widodo", role: "Kepala riset", bio: "Memutuskan kapan sebuah angka layak disebut temuan. Yang belum lolos sidang dalam tidak naik ke muka laporan." },
+        { initials: "DH", name: "Dimas Hartono", role: "Data dan arsip", bio: "Menjaga agar catatan lapangan dan tabel tetap tersambung. Perubahan protokol dicatat dengan tanggal, bukan ditimpa." },
+        { initials: "LP", name: "Lila Pramesti", role: "Peneliti lapangan", bio: "Merancang wawancara, cara meminta persetujuan, dan batas apa yang tidak boleh direkam." },
+        { initials: "FA", name: "Farid Anwar", role: "Editor publikasi", bio: "Memotong kalimat yang menyembunyikan ketidakpastian. Ringkasan yang tidak bisa ditelusuri dikembalikan ke penulis." },
+      ];
+
+      const papers = [
+        { id: "n7", studyId: "", code: "NOL-07", title: "Catatan lapangan belum disidangkan", kind: "Disusun", year: "2026", pages: "Protokol masih terbuka" },
+        { id: "n6", studyId: "pasar", code: "NOL-06", title: "Pasar Dingin", kind: "Laporan", year: "2025", pages: "86 hlm + lampiran protokol" },
+        { id: "n6a", studyId: "pasar", code: "NOL-06a", title: "Definisi akses pendingin", kind: "Lampiran", year: "2025", pages: "14 hlm" },
+        { id: "n5", studyId: "kalimat", code: "NOL-05", title: "Kalimat Panjang", kind: "Laporan", year: "2024", pages: "54 hlm" },
+        { id: "n3", studyId: "jam", code: "NOL-03", title: "Jam Sepi", kind: "Laporan", year: "2022", pages: "61 hlm + log jam" },
+        { id: "n2", studyId: "suara", code: "NOL-02", title: "Suara yang Sama", kind: "Indeks pola", year: "2021", pages: "40 hlm, tanpa identitas" },
+      ];
+
+      const years = ["2026", "2025", "2024", "2022", "2021"];
+      const nav = [
+        ["proses", "Proses"],
+        ["kajian", "Kajian"],
+        ["tim", "Tim"],
+        ["arsip", "Arsip"],
+        ["surat", "Surat"],
+      ];
+      const stats = [
+        ["04", "Kajian terbit"],
+        ["06", "Kota lapangan"],
+        ["1.240", "Catatan diarsip"],
+        ["2019", "Mulai bekerja"],
+      ];
+      const thesis = [
+        ["01", "Pertanyaan", "Satu kajian, satu pertanyaan yang bisa dijawab. Sisanya dicatat sebagai sampingan."],
+        ["02", "Protokol", "Cara mengukur dikunci lebih dulu. Perubahan setelah itu ditulis, tidak disembunyikan."],
+        ["03", "Batas", "Yang tidak kami klaim duduk di halaman yang sama dengan temuan."],
+      ];
+
+      const LETTER_KEY = "nol-letters";
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let activeStep = 0;
+      let studyId = "pasar";
+      let beat = 0;
+      let year = "semua";
+      let section = "";
+
+      const esc = (value) =>
+        String(value).replace(/[&<>"']/g, (char) => {
+          if (char === "&") return "\u0026amp;";
+          if (char === "<") return "\u0026lt;";
+          if (char === ">") return "\u0026gt;";
+          if (char === '"') return "\u0026quot;";
+          return "\u0026#39;";
+        });
+
+      const fmt = (value, unit) => (unit === "%" ? `${value}%` : new Intl.NumberFormat("id-ID").format(value));
+      const studyById = (id) => studies.find((item) => item.id === id) || studies[0];
+      const arrow =
+        '<svg class="size-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>';
+
+      function chip(on, action, id, label) {
+        return `<button type="button" data-action="${action}" data-id="${esc(id)}" aria-pressed="${on}" class="min-h-11 border px-3 text-sm transition-colors duration-200 ${on ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink"}">${esc(label)}</button>`;
+      }
+
+      function studyBody(study, drawn) {
+        const max = Math.max(...study.series.points.map((point) => point.value), 1);
+        return `
+          <p class="text-xs uppercase tracking-widest text-muted">${esc(study.status)} · ${esc(study.duration)}</p>
+          <h3 class="question mt-4">${esc(study.question)}</h3>
+          <p class="mt-5 max-w-2xl leading-relaxed">${esc(study.summary)}</p>
+          <dl class="mt-8 grid gap-6 border-t border-line pt-6 sm:grid-cols-3">
+            ${study.metrics.map((metric) => `<div><dt class="font-display text-4xl tracking-tight">${esc(metric.value)}</dt><dd class="mt-2 text-sm leading-snug">${esc(metric.label)}<span class="mt-1 block text-muted">${esc(metric.note)}</span></dd></div>`).join("")}
+          </dl>
+          <div class="mt-10">
+            <p class="text-xs uppercase tracking-widest text-muted">Jejak protokol</p>
+            <div class="relative mt-4">
+              <div class="absolute left-5 right-5 top-1.5 h-px bg-line" aria-hidden="true"></div>
+              <div class="draw absolute left-5 right-5 top-1.5 h-px bg-ink" style="transform:scaleX(${drawn ? 1 : 0})" aria-hidden="true"></div>
+              <div class="relative grid grid-cols-5" role="group" aria-label="Denyut protokol">
+                ${study.beats.map((item, index) => `<button type="button" data-action="beat" data-id="${index}" aria-pressed="${index === beat}" class="flex min-h-11 flex-col items-center gap-2 px-1"><span class="relative z-10 size-3 border border-ink ${index === beat ? "bg-ink" : "bg-paper"}"></span><span class="text-xs ${index === beat ? "text-ink" : "text-muted"}">${esc(item.short)}</span></button>`).join("")}
+              </div>
+            </div>
+            <p data-beat-note class="mt-4 min-h-16 border-t border-line pt-4 text-sm leading-relaxed">${esc(study.beats[beat].note)}</p>
+          </div>
+          <div class="chart mt-10" role="img" aria-label="${esc(study.series.caption)}">
+            <p class="text-xs uppercase tracking-widest text-muted">Sebaran</p>
+            <p class="mt-2 max-w-xl text-sm leading-relaxed text-muted">${esc(study.series.caption)}</p>
+            <div class="mt-5 flex flex-col gap-3">
+              ${study.series.points.map((point) => `<div class="flex items-center gap-3"><span class="w-20 shrink-0 text-sm">${esc(point.label)}</span><span class="h-2 min-w-0 flex-1 bg-fog"><span class="bar block h-full bg-ink" style="width:${(point.value / max) * 100}%"></span></span><span class="w-14 shrink-0 text-right text-sm tabular-nums">${esc(fmt(point.value, study.series.unit))}</span></div>`).join("")}
+            </div>
+          </div>
+          <div class="mt-10 grid gap-8 border-t border-line pt-6 lg:grid-cols-2">
+            <div><h4 class="text-xs uppercase tracking-widest text-muted">Bantahan yang lolos</h4><p class="mt-3 text-sm leading-relaxed">${esc(study.objection)}</p></div>
+            <div><h4 class="text-xs uppercase tracking-widest text-muted">Yang tidak kami klaim</h4><p class="mt-3 text-sm leading-relaxed">${esc(study.limit)}</p></div>
+          </div>`;
+      }
+
+      function paintStudy(drawn) {
+        const study = studyById(studyId);
+        document.querySelectorAll("[data-action='study']").forEach((button) => {
+          const on = button.dataset.id === studyId;
+          button.setAttribute("aria-pressed", String(on));
+          button.className = `flex min-h-11 w-full flex-col gap-1 px-5 py-5 text-left transition-colors duration-200 sm:px-8 ${on ? "bg-ink text-paper" : "hover:bg-fog"}`;
+          button.querySelectorAll("[data-meta]").forEach((node) => {
+            node.className = `text-xs uppercase tracking-widest ${on ? "text-mist" : "text-muted"}`;
+          });
+          const field = button.querySelector("[data-field]");
+          if (field) field.className = `text-sm ${on ? "text-mist" : "text-muted"}`;
+        });
+        const body = document.getElementById("study-body");
+        body.innerHTML = studyBody(study, drawn);
+        const chart = body.querySelector(".chart");
+        if (!chart) return;
+        const io = new IntersectionObserver(([entry]) => {
+          if (!entry?.isIntersecting) return;
+          chart.querySelectorAll(".bar").forEach((bar) => bar.classList.add("bar-fill"));
+          io.disconnect();
+        }, { threshold: 0.4 });
+        io.observe(chart);
+      }
+
+      function paintStep() {
+        const step = steps[activeStep];
+        document.getElementById("step-stage").innerHTML = `<div class="index-mask"><p class="index-num rise">${esc(step.n)}</p></div><h3 class="mt-4 font-display text-4xl tracking-tight">${esc(step.title)}</h3><p class="mt-4 max-w-sm text-base leading-relaxed">${esc(step.lead)}</p>`;
+        document.querySelectorAll("[data-action='step']").forEach((button) => {
+          const on = Number(button.dataset.id) === activeStep;
+          button.setAttribute("aria-pressed", String(on));
+          button.className = `min-h-11 min-w-11 border px-3 text-sm transition-colors duration-200 ${on ? "border-ink bg-ink text-paper" : "border-line bg-paper text-ink"}`;
+        });
+      }
+
+      function readLetters() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(LETTER_KEY) || "[]");
+          if (!Array.isArray(parsed)) return [];
+          return parsed.filter((row) => row && typeof row.id === "string" && typeof row.name === "string" && typeof row.question === "string").slice(0, 6);
+        } catch {
+          return [];
+        }
+      }
+
+      function paintLetters() {
+        const letters = readLetters();
+        const box = document.getElementById("letters");
+        if (!letters.length) {
+          box.innerHTML = '<p class="py-5 text-sm text-mist">Belum ada lembar di perangkat ini.</p>';
+          return;
+        }
+        box.innerHTML = `<ul>${letters.map((letter) => `<li class="border-b border-mist/40 py-4"><div class="flex items-baseline justify-between gap-4"><p class="text-sm">${esc(letter.name)}${letter.org ? `<span class="text-mist"> · ${esc(letter.org)}</span>` : ""}</p><button type="button" data-action="remove" data-id="${esc(letter.id)}" class="min-h-11 shrink-0 px-2 text-sm text-mist">Hapus</button></div><p class="mt-2 text-sm leading-relaxed">${esc(letter.question)}</p><p class="mt-2 text-xs tracking-wide text-mist">${esc(letter.at || "")}</p></li>`).join("")}</ul>`;
+      }
+
+      function paintArchive() {
+        const visible = papers.filter((paper) => year === "semua" || paper.year === year);
+        document.getElementById("year-filters").innerHTML =
+          chip(year === "semua", "year", "semua", "Semua") + years.map((item) => chip(year === item, "year", item, item)).join("");
+        document.getElementById("archive-list").innerHTML = visible
+          .map(
+            (paper) => `<li class="border-b border-line"><button type="button" data-action="paper" data-id="${esc(paper.studyId)}" class="grid w-full min-h-11 gap-1 py-4 text-left transition-colors duration-200 hover:bg-fog sm:grid-cols-[7rem_6.5rem_1fr] sm:items-baseline sm:gap-4 sm:px-2"><span class="text-sm text-muted">${esc(paper.year)} · ${esc(paper.kind)}</span><span class="text-sm">${esc(paper.code)}</span><span><span class="font-display text-2xl tracking-tight">${esc(paper.title)}</span><span class="mt-1 block text-sm text-muted">${esc(paper.pages)}</span></span></button></li>`,
+          )
+          .join("");
+      }
+
+      function paintNav() {
+        document.getElementById("section-label").textContent = section ? nav.find((item) => item[0] === section)?.[1] || "" : "";
+        document.querySelectorAll("[data-nav]").forEach((link) => {
+          const on = link.dataset.nav === section;
+          link.setAttribute("aria-current", on ? "true" : "false");
+          link.className = `inline-flex min-h-11 items-center whitespace-nowrap border-b px-2 text-sm ${on ? "border-ink text-ink" : "border-transparent text-muted"}`;
+        });
+      }
+
+      function paintBeat() {
+        const study = studyById(studyId);
+        const body = document.getElementById("study-body");
+        body.querySelectorAll("[data-action='beat']").forEach((button) => {
+          const on = Number(button.dataset.id) === beat;
+          button.setAttribute("aria-pressed", String(on));
+          const marks = button.querySelectorAll("span");
+          if (marks[0]) marks[0].className = `relative z-10 size-3 border border-ink ${on ? "bg-ink" : "bg-paper"}`;
+          if (marks[1]) marks[1].className = `text-xs ${on ? "text-ink" : "text-muted"}`;
+        });
+        const note = body.querySelector("[data-beat-note]");
+        if (note) note.textContent = study.beats[beat].note;
+      }
+
+      function openStudy(id, mode) {
+        studyId = id;
+        beat = 0;
+        const body = document.getElementById("study-body");
+        const apply = () => {
+          paintStudy(false);
+          requestAnimationFrame(() => {
+            const line = body.querySelector(".draw");
+            if (line) line.style.transform = "scaleX(1)";
+          });
+          body.classList.remove("translate-y-2", "opacity-0");
+          body.classList.add("translate-y-0", "opacity-100");
+        };
+        if (reduce) apply();
+        else {
+          body.classList.add("translate-y-2", "opacity-0");
+          body.classList.remove("translate-y-0", "opacity-100");
+          window.setTimeout(apply, 160);
+        }
+        if (mode === "detail") {
+          document.getElementById("study-detail")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+        }
+        if (mode === "section") {
+          const target = window.innerWidth < 1024 ? document.getElementById("study-detail") : document.getElementById("kajian");
+          target?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+        }
+      }
+
+      const lead = studies[0];
+      const line = studies.map((study) => `${study.code}  ${study.title}`).join("    ·    ");
+
+      document.getElementById("app").innerHTML = `
+        <a class="skip" href="#isi">Loncat ke isi</a>
+        <div class="sticky top-0 z-30 bg-paper">
+          <div id="progress" aria-hidden="true" class="h-0.5 w-full origin-left bg-ink" style="transform:scaleX(0)"></div>
+          <header class="border-b border-line">
+            <div class="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-3 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
+              <a href="#isi" class="flex min-h-11 items-baseline gap-3"><span class="font-display text-2xl tracking-tight">NOL</span><span class="text-sm text-muted">Laboratorium penelitian</span></a>
+              <div class="flex min-w-0 items-center gap-4">
+                <p id="section-label" class="hidden w-16 text-xs uppercase tracking-widest text-muted lg:block"></p>
+                <nav aria-label="Bagian" class="no-scrollbar flex max-w-full gap-1 overflow-x-auto">
+                  ${nav.map(([id, label]) => `<a data-nav="${id}" href="#${id}" class="inline-flex min-h-11 items-center whitespace-nowrap border-b border-transparent px-2 text-sm text-muted">${label}</a>`).join("")}
+                </nav>
+              </div>
+            </div>
+          </header>
+        </div>
+        <main id="isi">
+          <section class="mx-auto grid max-w-6xl gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-12 lg:items-end lg:py-20">
+            <div class="lg:col-span-7">
+              <p class="text-xs uppercase tracking-widest text-muted">Jakarta · lapangan sejak 2019</p>
+              <h1 class="display mt-5">Kesimpulan<span class="block">tanpa proses</span><span class="block italic">bukan temuan.</span></h1>
+              <p class="mt-6 max-w-xl text-base leading-relaxed">NOL adalah laboratorium kecil. Kami meneliti sistem kota — pangan, jam layanan, dan bahasa kebijakan — lalu meletakkan protokol di halaman yang sama dengan angka.</p>
+              <dl class="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-line pt-6 sm:grid-cols-4">
+                ${stats.map(([value, label]) => `<div><dt class="font-display text-3xl tracking-tight">${value}</dt><dd class="mt-1 text-xs uppercase tracking-widest text-muted">${label}</dd></div>`).join("")}
+              </dl>
+            </div>
+            <div class="lg:col-span-5">
+              <button type="button" data-action="open" data-id="pasar" class="group relative block w-full overflow-hidden bg-ink text-left text-paper">
+                <span class="plate-grid pointer-events-none absolute inset-0" aria-hidden="true"></span>
+                <span class="pointer-events-none absolute left-3 top-3 h-3 w-3 border-l border-t border-mist"></span>
+                <span class="pointer-events-none absolute right-3 top-3 h-3 w-3 border-r border-t border-mist"></span>
+                <span class="pointer-events-none absolute bottom-3 left-3 h-3 w-3 border-b border-l border-mist"></span>
+                <span class="pointer-events-none absolute bottom-3 right-3 h-3 w-3 border-b border-r border-mist"></span>
+                <span class="relative flex min-h-80 flex-col p-6 sm:p-8">
+                  <span class="flex items-center justify-between text-xs uppercase tracking-widest text-mist"><span>${esc(lead.code)}</span><span>${esc(lead.status)}</span></span>
+                  <span class="mt-8 font-display text-4xl tracking-tight">${esc(lead.title)}</span>
+                  <span class="mt-3 max-w-sm text-sm leading-relaxed text-mist">${esc(lead.duration)}. ${esc(lead.field)}. Batasnya ditulis di laporan yang sama.</span>
+                  <span class="scope mt-8" aria-hidden="true"><span class="scan-line"></span></span>
+                  <span class="mt-auto flex items-end justify-between gap-4 pt-6">
+                    <span><span class="block font-display text-4xl">${esc(lead.metrics[0].value)}</span><span class="mt-1 block max-w-40 text-sm text-mist">${esc(lead.metrics[0].label)}</span></span>
+                    <span class="inline-flex min-h-11 items-center gap-2 text-sm">Buka kajian ${arrow}</span>
+                  </span>
+                </span>
+              </button>
+            </div>
+          </section>
+          <div class="ticker overflow-hidden border-y border-line" aria-hidden="true"><div class="ticker-track"><p class="whitespace-nowrap px-6 py-3 text-sm tracking-wide text-muted">${esc(line)}<span class="px-6">·</span>${esc(line)}</p><p class="whitespace-nowrap px-6 py-3 text-sm tracking-wide text-muted">${esc(line)}<span class="px-6">·</span>${esc(line)}</p></div></div>
+          <section class="bg-ink text-paper">
+            <div class="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-12 lg:py-24">
+              <h2 class="display-md lg:col-span-7">Laporan yang hanya berisi kesimpulan kami tolak.</h2>
+              <ol class="lg:col-span-5">${thesis.map(([n, title, text]) => `<li class="border-t border-mist/40 py-5"><p class="text-xs uppercase tracking-widest text-mist">${n} ${title}</p><p class="mt-2 text-sm leading-relaxed">${text}</p></li>`).join("")}</ol>
+            </div>
+          </section>
+          <section id="proses" class="border-b border-line">
+            <div class="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
+              <div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+                <div class="max-w-xl"><p class="text-xs uppercase tracking-widest text-muted">Proses</p><h2 class="display-md mt-3">Lima langkah yang tidak kami lewati.</h2></div>
+                <div id="step-buttons" class="flex flex-wrap gap-2" role="group" aria-label="Langkah proses">${steps.map((step, index) => chip(index === 0, "step", String(index), step.n)).join("")}</div>
+              </div>
+            </div>
+            <div class="border-t border-line">
+              <div class="mx-auto grid max-w-6xl lg:grid-cols-2">
+                <div class="hidden lg:block"><div id="step-stage" class="sticky top-28 px-8 py-16"></div></div>
+                <div class="lg:border-l lg:border-line">
+                  ${steps.map((step, index) => `<article data-index="${index}" class="step-pane border-b border-line px-5 py-12 sm:px-8 lg:px-10 lg:py-16"><p class="text-xs uppercase tracking-widest text-muted lg:hidden">${esc(step.n)}</p><h3 class="mt-2 font-display text-3xl tracking-tight lg:hidden">${esc(step.title)}</h3><p class="mt-3 leading-relaxed lg:hidden">${esc(step.lead)}</p><p class="mt-6 max-w-lg leading-relaxed lg:mt-0">${esc(step.body)}</p><ul class="mt-6 border-t border-line">${step.notes.map((note) => `<li class="border-b border-line py-3 text-sm leading-relaxed">${esc(note)}</li>`).join("")}</ul></article>`).join("")}
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="kajian">
+            <div class="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
+              <p class="text-xs uppercase tracking-widest text-muted">Kajian</p>
+              <div class="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <h2 class="display-md max-w-xl">Hasil yang masih menyimpan jalannya.</h2>
+                <p class="max-w-sm text-sm leading-relaxed text-muted">Pilih satu kajian. Lima denyut di kanan adalah jejak protokol, bukan hiasan urutan.</p>
+              </div>
+            </div>
+            <div class="border-t border-line">
+              <div class="mx-auto grid max-w-6xl lg:grid-cols-12">
+                <div class="border-b border-line lg:col-span-4 lg:border-b-0 lg:border-r">
+                  <ul>${studies.map((study) => `<li class="border-b border-line"><button type="button" data-action="study" data-id="${study.id}" class="flex min-h-11 w-full flex-col gap-1 px-5 py-5 text-left sm:px-8"><span data-meta class="text-xs uppercase tracking-widest text-muted">${esc(study.code)} · ${esc(study.year)}</span><span class="font-display text-2xl tracking-tight">${esc(study.title)}</span><span data-field class="text-sm text-muted">${esc(study.field)}</span></button></li>`).join("")}</ul>
+                </div>
+                <div id="study-detail" class="scroll-mt-28 lg:col-span-8"><div id="study-body" class="fade-swap px-5 py-8 sm:px-8 lg:px-10 lg:py-12"></div></div>
+              </div>
+            </div>
+          </section>
+          <section id="tim" class="border-t border-line">
+            <div class="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
+              <p class="text-xs uppercase tracking-widest text-muted">Tim</p>
+              <h2 class="display-md mt-3 max-w-xl">Empat orang. Sidang di dalam lebih dulu.</h2>
+              <ul class="mt-10 border-t border-line">${people.map((person) => `<li class="grid gap-4 border-b border-line py-6 sm:grid-cols-[3.5rem_14rem_1fr] sm:items-start"><span class="flex size-12 items-center justify-center border border-ink font-display text-lg">${esc(person.initials)}</span><div><p class="text-lg">${esc(person.name)}</p><p class="mt-1 text-sm text-muted">${esc(person.role)}</p></div><p class="max-w-prose text-sm leading-relaxed">${esc(person.bio)}</p></li>`).join("")}</ul>
+            </div>
+          </section>
+          <section id="arsip" class="border-t border-line">
+            <div class="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
+              <p class="text-xs uppercase tracking-widest text-muted">Arsip</p>
+              <div class="mt-3 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                <h2 class="display-md max-w-xl">Daftar terbitan, bukan berkas unduhan.</h2>
+                <div id="year-filters" class="flex flex-wrap gap-2" role="group" aria-label="Saring tahun"></div>
+              </div>
+              <p class="mt-6 max-w-xl text-sm leading-relaxed text-muted">Yang tampil adalah daftar dan jenis dokumen. Berkas penuh tidak disimpan di halaman ini. Pilih baris untuk membuka kajian, atau kembali ke proses bila protokolnya belum dikunci.</p>
+              <ul id="archive-list" class="mt-8 border-t border-line"></ul>
+            </div>
+          </section>
+          <section id="surat" class="border-t border-line bg-ink text-paper">
+            <div class="mx-auto grid max-w-6xl gap-12 px-5 py-14 sm:px-8 sm:py-16 lg:grid-cols-12">
+              <div class="lg:col-span-5">
+                <p class="text-xs uppercase tracking-widest text-mist">Surat</p>
+                <h2 class="display-md mt-3">Ajukan pertanyaan, bukan janji kerja sama.</h2>
+                <p class="mt-5 max-w-md text-sm leading-relaxed text-mist">Lembar ini tidak dikirim ke server. Ia tersimpan di peramban Anda, sebagai catatan pertanyaan yang ingin Anda ajukan ke tim riset.</p>
+              </div>
+              <div class="lg:col-span-7">
+                <form id="letter-form" novalidate class="grid gap-5">
+                  <div><label for="nama" class="text-xs uppercase tracking-widest text-mist">Nama</label><input id="nama" name="nama" autocomplete="name" class="mt-2 w-full border-b border-mist/50 bg-transparent py-3 text-base text-paper outline-none" /><p id="nama-error" class="mt-2 hidden text-sm"></p></div>
+                  <div><label for="lembaga" class="text-xs uppercase tracking-widest text-mist">Lembaga, bila ada</label><input id="lembaga" name="lembaga" autocomplete="organization" class="mt-2 w-full border-b border-mist/50 bg-transparent py-3 text-base text-paper outline-none" /></div>
+                  <div><label for="pertanyaan" class="text-xs uppercase tracking-widest text-mist">Pertanyaan</label><textarea id="pertanyaan" name="pertanyaan" rows="4" class="mt-2 w-full resize-y border-b border-mist/50 bg-transparent py-3 text-base leading-relaxed text-paper outline-none"></textarea><p id="pertanyaan-error" class="mt-2 hidden text-sm"></p></div>
+                  <div class="flex flex-wrap items-center gap-4"><button type="submit" class="min-h-11 bg-paper px-5 text-sm text-ink transition-transform duration-150 active:scale-[0.96]">Simpan lembar</button><p id="notice" tabindex="-1" class="text-sm text-mist outline-none"></p></div>
+                  <p id="storage-error" class="hidden text-sm"></p>
+                </form>
+                <div id="letters" class="mt-10 border-t border-mist/40"></div>
+              </div>
+            </div>
+          </section>
+        </main>
+        <footer class="border-t border-line"><div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 sm:flex-row sm:items-end sm:justify-between sm:px-8"><div><p class="font-display text-3xl">NOL</p><p class="mt-2 text-sm text-muted">Laboratorium penelitian · Jakarta · sejak 2019</p></div><p class="max-w-xs text-sm leading-normal text-muted">Proses ikut diterbitkan. Angka tanpa jalan menuju angka itu tidak dihitung sebagai hasil.</p></div></footer>`;
+
+      paintStep();
+      paintStudy(false);
+      requestAnimationFrame(() => {
+        const lineEl = document.querySelector("#study-body .draw");
+        if (lineEl) lineEl.style.transform = "scaleX(1)";
+      });
+      paintArchive();
+      paintLetters();
+
+      const stepObserver = new IntersectionObserver((entries) => {
+        const hit = entries.find((entry) => entry.isIntersecting);
+        if (!hit) return;
+        const index = Number(hit.target.dataset.index);
+        if (Number.isNaN(index) || index === activeStep) return;
+        activeStep = index;
+        paintStep();
+      }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
+      document.querySelectorAll("#proses article").forEach((node) => stepObserver.observe(node));
+
+      const sectionObserver = new IntersectionObserver((entries) => {
+        const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visible?.target.id) return;
+        section = visible.target.id;
+        paintNav();
+      }, { rootMargin: "-30% 0px -50% 0px", threshold: [0.15, 0.4, 0.7] });
+      nav.forEach(([id]) => {
+        const node = document.getElementById(id);
+        if (node) sectionObserver.observe(node);
+      });
+
+      let frame = 0;
+      const onScroll = () => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          const span = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = span > 0 ? Math.min(1, Math.max(0, window.scrollY / span)) : 0;
+          document.getElementById("progress").style.transform = `scaleX(${progress})`;
+        });
+      };
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      document.body.addEventListener("click", (event) => {
+        const target = event.target.closest("[data-action]");
+        if (!target) return;
+        const { action, id } = target.dataset;
+        if (action === "step") {
+          activeStep = Number(id);
+          paintStep();
+          document.querySelector(`#proses article[data-index="${id}"]`)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+        }
+        if (action === "study") openStudy(id, window.innerWidth < 1024 ? "detail" : "none");
+        if (action === "open") openStudy(id, "section");
+        if (action === "beat") {
+          beat = Number(id);
+          paintBeat();
+        }
+        if (action === "year") {
+          year = id;
+          paintArchive();
+        }
+        if (action === "paper") {
+          if (id) openStudy(id, "section");
+          else document.getElementById("proses")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+        }
+        if (action === "remove") {
+          const next = readLetters().filter((letter) => letter.id !== id);
+          try {
+            localStorage.setItem(LETTER_KEY, JSON.stringify(next));
+            paintLetters();
+          } catch {
+            const box = document.getElementById("storage-error");
+            box.textContent = "Lembar tidak bisa dihapus dari peramban ini.";
+            box.classList.remove("hidden");
+          }
+        }
+      });
+
+      document.getElementById("letter-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = document.getElementById("nama").value.trim();
+        const org = document.getElementById("lembaga").value.trim();
+        const question = document.getElementById("pertanyaan").value.trim();
+        const nameError = document.getElementById("nama-error");
+        const questionError = document.getElementById("pertanyaan-error");
+        nameError.textContent = name.length < 2 ? "Tuliskan nama." : "";
+        nameError.classList.toggle("hidden", name.length >= 2);
+        questionError.textContent = question.length < 12 ? "Pertanyaan masih terlalu pendek." : "";
+        questionError.classList.toggle("hidden", question.length >= 12);
+        document.getElementById("nama").classList.toggle("border-paper", name.length < 2);
+        document.getElementById("pertanyaan").classList.toggle("border-paper", question.length < 12);
+        if (name.length < 2 || question.length < 12) {
+          document.getElementById("notice").textContent = "";
+          return;
+        }
+        const letter = {
+          id: crypto.randomUUID(),
+          name,
+          org,
+          question,
+          at: new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(new Date()),
+        };
+        try {
+          const next = [letter, ...readLetters()].slice(0, 6);
+          localStorage.setItem(LETTER_KEY, JSON.stringify(next));
+          document.getElementById("pertanyaan").value = "";
+          document.getElementById("storage-error").classList.add("hidden");
+          const notice = document.getElementById("notice");
+          notice.textContent = "Lembar tersimpan di peramban ini.";
+          paintLetters();
+          notice.focus();
+        } catch {
+          const box = document.getElementById("storage-error");
+          box.textContent = "Peramban ini menolak penyimpanan. Salin pertanyaan Anda di tempat lain.";
+          box.classList.remove("hidden");
+        }
+      });
+    </script>
+  </body>
+</html>

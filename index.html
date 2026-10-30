@@ -7,12 +7,18 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>Green AI Literacy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap"
     />
     <link rel="stylesheet" href="style.css" />
     <script defer src="main.js"></script>
+    <script defer src="scroll.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="supabase-config.js"></script>
+    <script defer src="admin.js"></script>
     <style>
       html {
         font-size: 100%;
@@ -26,7 +32,8 @@
         font-size: 1rem;
       }
       .w {
-        max-width: 1120px;
+        max-width: 90rem;
+        margin-inline: auto;
         padding-inline: clamp(20px, 4vw, 48px);
       }
       section {
@@ -256,6 +263,9 @@
         ><button class="l" data-go="riset" data-r="gsf">Riset</button
         ><button class="l" data-go="saran" data-r="gsf">Saran</button
         ><button class="l" data-go="tentang" data-r="gsf">Tentang</button
+        ><button class="l" id="admin-nav" data-go="admin" data-r="sgf" hidden>
+          Admin
+        </button
         ><span class="me" id="me"></span
         ><button class="btn" id="lgb" type="button">Masuk</button
         ><button id="th" aria-label="Ganti tema terang atau gelap">Tema</button>
@@ -267,52 +277,49 @@
         <section id="top" class="hero">
           <canvas id="cv" aria-hidden="true"></canvas>
           <div class="w">
-            <div class="brand">
-              <svg
-                class=""
-                viewBox="0 0 138 192"
-                width="52"
-                height="72"
-                aria-hidden="true"
-              >
-                <path
-                  fill="var(--g2)"
-                  fill-rule="evenodd"
-                  d="M53.9 23.9 L52.6 24.4 L51.4 25.6 L50.9 26.9 L50.9 43.5 L50.4 44.5 L49.5 44.9 L32.9 44.9 L31.6 45.4 L30.0 47.4 L29.9 102.0 L30.4 103.2 L32.4 104.9 L40.5 105.0 L41.8 105.9 L41.9 132.0 L42.4 133.2 L43.6 134.5 L44.9 135.0 L58.5 135.0 L59.4 135.4 L59.9 136.4 L59.9 153.0 L60.4 154.2 L61.6 155.5 L62.9 156.0 L74.5 156.1 L75.1 156.9 L75.2 165.8 L76.6 167.4 L78.2 167.8 L79.2 167.4 L80.4 166.2 L80.8 165.2 L80.9 155.0 L82.1 153.6 L85.9 151.2 L86.9 150.2 L82.9 152.6 L80.6 154.5 L80.1 155.9 L80.1 165.1 L79.9 166.1 L79.1 166.9 L78.2 167.1 L76.8 166.9 L76.0 166.1 L75.8 165.1 L75.8 156.5 L75.1 155.0 L75.5 151.8 L76.5 150.5 L77.4 150.4 L78.6 148.9 L79.5 148.5 L80.5 147.4 L84.5 144.9 L92.9 136.5 L94.2 134.1 L96.0 132.1 L95.5 132.1 L92.4 136.5 L84.5 144.4 L81.0 146.6 L80.1 147.6 L78.0 149.1 L76.4 149.9 L66.9 149.8 L66.0 148.5 L66.0 131.9 L65.5 130.6 L64.2 129.4 L63.0 128.9 L49.4 128.9 L48.4 128.4 L48.0 127.5 L47.9 101.4 L47.5 100.6 L45.5 99.0 L37.4 98.9 L36.5 98.5 L36.0 97.5 L36.1 51.9 L37.4 51.0 L54.0 51.0 L55.2 50.5 L56.5 49.2 L57.0 48.0 L57.0 31.4 L57.4 30.5 L58.4 30.0 L71.1 30.0 L71.5 29.5 L70.9 27.4 L71.0 25.6 L71.5 24.4 L71.1 23.9Z"
-                />
-                <path
-                  fill="var(--g)"
-                  fill-rule="evenodd"
-                  d="M85.2 29.1 L84.6 29.5 L84.0 30.9 L82.2 32.8 L82.2 33.4 L84.8 35.0 L93.2 43.6 L94.4 45.6 L99.1 52.0 L103.2 60.2 L104.2 62.8 L104.4 63.9 L105.2 65.2 L105.2 66.5 L106.2 68.2 L106.4 70.8 L107.2 72.8 L107.2 75.2 L108.2 77.8 L108.4 82.6 L108.8 83.6 L108.6 86.2 L109.1 87.4 L109.1 93.5 L108.6 94.6 L108.8 96.2 L108.4 97.2 L108.1 102.6 L107.4 104.1 L107.1 107.6 L106.4 109.1 L106.2 111.1 L105.4 113.1 L105.1 115.2 L104.2 116.6 L104.1 117.4 L103.4 118.2 L103.1 120.4 L102.2 121.4 L102.0 122.6 L101.1 123.6 L101.0 124.6 L99.4 126.2 L99.2 127.1 L98.4 128.2 L98.1 129.4 L96.4 131.2 L96.1 132.4 L94.4 134.2 L92.9 136.8 L84.8 144.9 L80.9 147.4 L77.4 150.5 L76.5 150.6 L75.6 151.8 L75.2 155.0 L75.9 156.5 L75.9 165.1 L76.2 166.2 L77.6 167.0 L79.1 166.8 L79.9 165.8 L80.0 155.9 L80.6 154.2 L89.1 148.1 L97.1 140.1 L98.0 138.1 L99.1 137.1 L100.6 134.6 L102.5 132.6 L102.6 131.8 L103.5 130.6 L103.9 129.2 L104.8 128.2 L104.9 127.2 L105.8 126.2 L105.9 125.2 L106.8 124.2 L106.9 123.2 L107.8 122.2 L108.6 119.8 L109.5 118.5 L109.6 116.8 L110.6 115.1 L110.8 113.2 L111.6 111.2 L111.8 108.6 L112.5 107.5 L112.8 103.6 L113.5 102.5 L113.8 94.4 L114.2 93.2 L114.2 85.6 L113.8 84.5 L113.6 78.6 L112.6 75.1 L112.6 73.6 L111.6 70.1 L111.5 68.1 L110.6 66.1 L110.1 63.4 L108.6 60.1 L108.5 59.0 L103.2 48.5 L100.6 45.2 L97.4 40.2 L88.1 30.8 L86.5 30.1Z"
-                />
-                <path
-                  fill="#b9652f"
-                  d="M77.5 20.0 L76.1 20.2 L74.2 21.1 L72.0 23.2 L71.1 25.6 L71.0 27.4 L71.8 30.2 L73.8 32.4 L76.1 33.6 L78.4 33.9 L81.0 33.1 L83.2 31.0 L84.9 27.9 L84.8 25.6 L84.2 24.2 L83.4 22.8 L82.1 21.5 L79.8 20.2Z"
-                /></svg
-              ><span><b>Green AI</b><small>literasi</small></span>
+            <div class="hero-grid">
+              <div class="hero-copy">
+                <p class="kicker">MAN IC Padang Pariaman · OMI Riset 2026</p>
+                <h1>Satu prompt,<span>banyak dampak.</span></h1>
+                <p class="mu">
+                  Pahami jejak AI dan gunakan saat benar-benar membantu belajar.
+                </p>
+                <form class="ask" id="ask">
+                  <input
+                    id="q"
+                    aria-label="Pertanyaan untuk AI"
+                    placeholder="Contoh: jelaskan fotosintesis"
+                  /><button class="btn" type="submit">Kirim prompt</button>
+                </form>
+              </div>
+              <aside class="hero-aside" data-ui aria-labelledby="chain-title">
+                <h2 id="chain-title">Perjalanan satu prompt</h2>
+                <div class="chain" id="chain" aria-hidden="true"></div>
+                <div id="cap" role="status" aria-live="polite">
+                  Kirim satu prompt untuk melihat rantainya.
+                </div>
+                <p>
+                  Dampak berbeda menurut model, lokasi, sumber listrik,
+                  pendinginan, dan jenis tugas. Tidak ada angka mutlak.
+                </p>
+              </aside>
             </div>
-            <h1>Satu prompt, banyak dampak.</h1>
-            <p class="mu">
-              Pahami jejak AI dan gunakan saat benar-benar membantu belajar.
-            </p>
-            <form class="ask" id="ask">
-              <input
-                id="q"
-                aria-label="Pertanyaan untuk AI"
-                placeholder="Contoh: jelaskan fotosintesis"
-              /><button class="btn" type="submit">Kirim prompt</button>
-            </form>
-            <div class="chain" id="chain" aria-hidden="true"></div>
-            <div id="cap" role="status" aria-live="polite">
-              Kirim satu prompt untuk melihat rantainya.
-            </div>
-            <p class="mu" style="font-size: 0.9rem">
-              Besar dampaknya berbeda menurut model, lokasi, sumber listrik,
-              sistem pendinginan, dan jenis tugas. Karena itu situs ini tidak
-              memakai angka mutlak.
-            </p>
           </div>
         </section>
+        <div class="ticker" aria-hidden="true">
+          <div class="ticker-track">
+            <p>
+              Get Awareness <span>·</span> Recognize Impact
+              <span>·</span> Evaluate Need <span>·</span> Execute Efficient Use
+              <span>·</span> Nurture Sustainable Habits <span>·</span>
+            </p>
+            <p>
+              Get Awareness <span>·</span> Recognize Impact
+              <span>·</span> Evaluate Need <span>·</span> Execute Efficient Use
+              <span>·</span> Nurture Sustainable Habits <span>·</span>
+            </p>
+          </div>
+        </div>
         <section>
           <div class="w">
             <div class="stats">
@@ -761,142 +768,33 @@
                 </li>
               </ul>
             </details>
-            <h3 style="margin-top: 32px">Rambu hijau, kuning, dan merah</h3>
-            <div class="rm3">
-              <div style="border-color: #4c9a4c">
-                <h3>Hijau: bebas dikreasikan</h3>
-                <ul>
-                  <li>
-                    Cara menyampaikan: ceramah singkat, permainan, role-play,
-                    diskusi, gallery walk, jigsaw
-                  </li>
-                  <li>Analogi dan contoh lokal tanpa angka mutlak</li>
-                  <li>Bahasa, gaya, pengaturan kelas, dan media</li>
-                  <li>
-                    Pembuka, jeda aktif, dan penutup (isi wajib tetap
-                    tersampaikan)
-                  </li>
-                </ul>
-              </div>
-              <div style="border-color: #d9a21b">
-                <h3>Kuning: boleh dengan syarat</h3>
-                <ul>
-                  <li>Menukar urutan kegiatan dalam satu tahap</li>
-                  <li>Memindahkan segmen ELASTIS ke tugas mandiri</li>
-                  <li>
-                    Mengganti studi kasus (ada unsur lokal dan global, sumber
-                    kredibel)
-                  </li>
-                  <li>Memilih jumlah sesi selain tiga (belum diuji)</li>
-                  <li>Mendemonstrasikan AI bila sekolah mengizinkan</li>
-                </ul>
-              </div>
-              <div style="border-color: #c0392b">
-                <h3>Merah: tidak boleh</h3>
-                <ul>
-                  <li>Melewati, menukar, atau menggabungkan tahap G-R-E-E-N</li>
-                  <li>Menghapus produk siswa</li>
-                  <li>Menilai atau melabeli kebiasaan siswa</li>
-                  <li>
-                    Menyebut angka energi, air, atau emisi mutlak tanpa data
-                    tepercaya
-                  </li>
-                  <li>
-                    Menyampaikan pesan “jangan pakai AI” atau mengambil alih
-                    keputusan siswa
-                  </li>
-                  <li>
-                    Menilai dari jumlah prompt, atau menghilangkan pelaporan
-                    penggunaan AI
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <p style="margin-top: 12px">
-              <b>Uji empat pertanyaan sebelum memakai kreasi baru:</b> urutan
-              G-R-E-E-N tetap terjaga? setiap siswa tetap menghasilkan produk
-              tahap itu? indikator tahap masih tercapai? keputusan tetap di
-              tangan siswa tanpa penghakiman dan tanpa angka mutlak?
+            <h3 style="margin-top: 32px">Rambu penggunaan AI</h3>
+            <p class="mu">
+              Gunakan sebagai titik awal diskusi; sesuaikan dengan tujuan tugas
+              dan aturan sekolah.
             </p>
-            <h3 style="margin-top: 32px">Situasi yang sering muncul</h3>
-            <details>
-              <summary>“AI itu boros banget, jangan dipakai.”</summary>
-              <p>
-                Tanyakan “bergantung pada apa?” Ingatkan tujuan: penggunaan
-                sadar, bukan berhenti.
-              </p>
-            </details>
-            <details>
-              <summary>“Satu prompt kan tidak berdampak.”</summary>
-              <p>
-                Ajak melihat jumlah pengguna dan analogi keran. Besar dampak
-                berbeda menurut konteks.
-              </p>
-            </details>
-            <details>
-              <summary>Siswa merasa dihakimi saat audit</summary>
-              <p>
-                Tegaskan audit hanya untuk melihat pola. Tidak ada jawaban benar
-                atau salah. Gunakan cara anonim.
-              </p>
-            </details>
-            <details>
-              <summary>Siswa menyalin hasil AI tanpa paham</summary>
-              <p>
-                Minta menjelaskan satu bagian dengan kata sendiri, lalu arahkan
-                ke verifikasi.
-              </p>
-            </details>
-            <details>
-              <summary>Siswa tidak punya akses AI atau perangkat</summary>
-              <p>
-                Latihan kelas cukup di lembar kerja. Atur berbagi perangkat.
-                Keputusan “tanpa AI” dengan alasan jelas tetap sah.
-              </p>
-            </details>
-            <details>
-              <summary>Siswa takut dianggap curang bila melapor</summary>
-              <p>
-                Pelaporan adalah bagian dari kejujuran akademik. Tujuannya
-                belajar, bukan menghukum.
-              </p>
-            </details>
-            <h3 style="margin-top: 32px">
-              Daftar periksa (tersimpan di perangkat)
-            </h3>
-            <div class="gate">
-              <label style="display: block; padding: 4px 0"
-                ><input type="checkbox" data-c="0" /> Saya sudah membaca Modul
-                dan Panduan serta menandai kegiatan INTI.</label
-              ><label style="display: block; padding: 4px 0"
-                ><input type="checkbox" data-c="1" /> Model jadwal, tanggal
-                sesi, tenggat tugas mandiri, dan tanggal cek ulang sudah
-                dikunci.</label
-              ><label style="display: block; padding: 4px 0"
-                ><input type="checkbox" data-c="2" /> Kebijakan sekolah tentang
-                AI sudah saya pahami dan siap disampaikan.</label
-              ><label style="display: block; padding: 4px 0"
-                ><input type="checkbox" data-c="3" /> Saya menerima kebiasaan
-                siswa tanpa menghakimi.</label
-              ><label style="display: block; padding: 4px 0"
-                ><input type="checkbox" data-c="4" /> Siswa menjelaskan konsep
-                dengan kata sendiri.</label
-              ><label style="display: block; padding: 4px 0"
-                ><input type="checkbox" data-c="5" /> Keputusan memakai AI
-                diambil siswa dan beralasan.</label
-              ><label style="display: block; padding: 4px 0"
-                ><input type="checkbox" data-c="6" /> Apresiasi diberikan pada
-                alasan dan proses, bukan jumlah prompt.</label
-              ><label style="display: block; padding: 4px 0"
-                ><input type="checkbox" data-c="7" /> Penutup tiap sesi memuat
-                tugas dan jadwal berikutnya.</label
-              ><label style="display: block; padding: 4px 0"
-                ><input type="checkbox" data-c="8" /> Setiap siswa pulang
-                membawa aturan Green-AI pribadi dan Kartu Komitmen.</label
-              ><label style="display: block; padding: 4px 0"
-                ><input type="checkbox" data-c="9" /> Jadwal Tugas Kinerja dan
-                cek ulang 14 hari sudah dikomunikasikan.</label
-              >
+            <div class="rm3">
+              <div>
+                <h3>Hijau: boleh digunakan</h3>
+                <p>
+                  AI boleh membantu. Siswa tetap memeriksa hasil dan menjelaskan
+                  bagian yang dibantu AI.
+                </p>
+              </div>
+              <div>
+                <h3>Kuning: ada batasan</h3>
+                <p>
+                  Tentukan bagian yang boleh dibantu AI, lalu minta siswa
+                  mencatat dan memeriksa penggunaannya.
+                </p>
+              </div>
+              <div>
+                <h3>Merah: kerjakan mandiri</h3>
+                <p>
+                  AI tidak digunakan untuk tugas tersebut. Tegaskan alasannya
+                  dan alternatif bantuan yang tetap diperbolehkan.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -1220,14 +1118,112 @@
           </div>
         </section>
       </div>
-    </main>
-    <footer>
-      <div class="w">
-        Green AI Literacy. Tujuannya pengguna AI yang paling sadar, bukan yang
-        paling sedikit. Data tersimpan di perangkatmu, tanpa akun server.
+      <div class="pg" id="p-admin">
+        <section>
+          <div class="w admin">
+            <h1>Dashboard super admin</h1>
+            <p id="admin-status" role="status" aria-live="polite"></p>
+            <div id="admin-login">
+              <h2>Masuk sebagai admin</h2>
+              <form id="admin-login-form" class="f admin-form">
+                <label for="admin-email">Email</label>
+                <input id="admin-email" type="email" autocomplete="username" required />
+                <label for="admin-password">Kata sandi</label>
+                <input
+                  id="admin-password"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                />
+                <button class="btn" type="submit">Masuk</button>
+              </form>
+            </div>
+            <div id="admin-dashboard" hidden>
+              <div class="row admin-actions">
+                <button class="btn o" id="admin-refresh" type="button">Muat ulang</button>
+                <button class="btn o" id="admin-logout" type="button">Keluar</button>
+              </div>
+              <section class="admin-section">
+                <h2 id="content-form-title">Tambah blok konten</h2>
+                <form id="content-form" class="f admin-form">
+                  <label for="content-page">Halaman</label>
+                  <select id="content-page" required>
+                    <option value="beranda">Beranda</option>
+                    <option value="panduan">Panduan</option>
+                    <option value="model">Model</option>
+                    <option value="lab">Lab</option>
+                    <option value="misi">Misi</option>
+                    <option value="kartu">Kartu</option>
+                    <option value="lacak">Pelacak</option>
+                    <option value="log">Log AI</option>
+                    <option value="asesmen">Asesmen</option>
+                    <option value="riset">Riset</option>
+                    <option value="saran">Saran</option>
+                    <option value="tentang">Tentang</option>
+                  </select>
+                  <label for="content-title">Judul</label>
+                  <input id="content-title" maxlength="160" required />
+                  <label for="content-body">Isi</label>
+                  <textarea id="content-body" rows="5" maxlength="5000" required></textarea>
+                  <label for="content-order">Urutan tampil</label>
+                  <input id="content-order" type="number" value="0" step="1" />
+                  <label>
+                    <input id="content-published" type="checkbox" />
+                    Terbitkan konten
+                  </label>
+                  <div class="row">
+                    <button class="btn" id="content-save" type="submit">Simpan blok</button>
+                    <button class="btn o" id="content-cancel" type="button">Batal</button>
+                  </div>
+                </form>
+                <div id="admin-content-list" class="admin-list"></div>
+              </section>
+              <section class="admin-section">
+                <h2>Masukan pengguna</h2>
+                <div id="admin-feedback-list" class="admin-list"></div>
+              </section>
+              <section class="admin-section">
+                <h2>Tambah hasil riset</h2>
+                <form id="research-form" class="f admin-form">
+                  <label for="research-count">Jumlah peserta</label>
+                  <input id="research-count" type="number" min="1" step="1" required />
+                  <fieldset>
+                    <legend>Skor awal (4–16), enam dimensi G-R-E-E-N</legend>
+                    <div class="admin-scores">
+                      <label>Knowledge <input id="research-pre-0" type="number" min="4" max="16" required /></label>
+                      <label>Awareness <input id="research-pre-1" type="number" min="4" max="16" required /></label>
+                      <label>Impact Recognition <input id="research-pre-2" type="number" min="4" max="16" required /></label>
+                      <label>Need Evaluation <input id="research-pre-3" type="number" min="4" max="16" required /></label>
+                      <label>Efficiency Judgment <input id="research-pre-4" type="number" min="4" max="16" required /></label>
+                      <label>Reflection <input id="research-pre-5" type="number" min="4" max="16" required /></label>
+                    </div>
+                  </fieldset>
+                  <fieldset>
+                    <legend>Skor akhir (4–16), urutan dimensi sama</legend>
+                    <div class="admin-scores">
+                      <label>Knowledge <input id="research-post-0" type="number" min="4" max="16" required /></label>
+                      <label>Awareness <input id="research-post-1" type="number" min="4" max="16" required /></label>
+                      <label>Impact Recognition <input id="research-post-2" type="number" min="4" max="16" required /></label>
+                      <label>Need Evaluation <input id="research-post-3" type="number" min="4" max="16" required /></label>
+                      <label>Efficiency Judgment <input id="research-post-4" type="number" min="4" max="16" required /></label>
+                      <label>Reflection <input id="research-post-5" type="number" min="4" max="16" required /></label>
+                    </div>
+                  </fieldset>
+                  <label for="research-notes">Catatan</label>
+                  <textarea id="research-notes" rows="4" maxlength="5000"></textarea>
+                  <label>
+                    <input id="research-published" type="checkbox" />
+                    Tampilkan sebagai hasil publik
+                  </label>
+                  <button class="btn" type="submit">Simpan hasil riset</button>
+                </form>
+                <div id="admin-research-list" class="admin-list"></div>
+              </section>
+            </div>
+          </div>
+        </section>
       </div>
-    </footer>
-
+    </main>
     <dialog id="dlg" aria-labelledby="dlt">
       <h3 id="dlt">Masuk</h3>
       <p class="mu">
@@ -1236,8 +1232,8 @@
       </p>
       <fieldset>
         <legend>Peran</legend>
-        <label><input type="radio" name="pr" value="s" checked /> Siswa</label
-        ><label><input type="radio" name="pr" value="f" /> Fasilitator</label>
+        <label><input type="radio" name="pr" value="s" checked /> Siswa</label>
+        <label><input type="radio" name="pr" value="f" /> Fasilitator</label>
       </fieldset>
       <div class="f" style="display: grid; gap: 8px; margin: 10px 0">
         <input
@@ -1245,32 +1241,16 @@
           placeholder="Nama"
           maxlength="40"
           autocomplete="name"
-        /><input id="dkl" placeholder="Kelas" maxlength="12" /><input
-          id="dkc"
-          placeholder="Kode kelas (opsional)"
-          maxlength="12"
-        /><input id="dkd" placeholder="Kode fasilitator" hidden />
+        />
+        <input id="dkl" placeholder="Kelas" maxlength="12" />
+        <input id="dkc" placeholder="Kode kelas (opsional)" maxlength="12" />
+        <input id="dkd" placeholder="Kode fasilitator" hidden />
       </div>
       <div class="err" id="dde" role="alert"></div>
       <div class="row">
-        <button class="btn" id="ddn" type="button">Masuk</button
-        ><button class="btn o" id="dcl" type="button">Batal</button>
+        <button class="btn" id="ddn" type="button">Masuk</button>
+        <button class="btn o" id="dcl" type="button">Batal</button>
       </div>
     </dialog>
-    <div id="mc" aria-live="polite">
-      <div id="mb"></div>
-      <svg viewBox="0 0 48 48" width="52" height="52" aria-hidden="true">
-        <path d="M24 4C38 10 42 26 24 44C6 26 10 10 24 4Z" fill="var(--g)" />
-        <circle cx="19" cy="22" r="3" fill="var(--on)" />
-        <circle cx="29" cy="22" r="3" fill="var(--on)" />
-        <path
-          d="M19 30Q24 34 29 30"
-          stroke="var(--on)"
-          fill="none"
-          stroke-width="2"
-          stroke-linecap="round"
-        />
-      </svg>
-    </div>
   </body>
 </html>

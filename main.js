@@ -41,13 +41,14 @@ $("#ask").onsubmit = (e) => {
   if (busy) return;
   busy = 1;
   const ns = document.querySelectorAll(".node");
-  ns.forEach((n) => n.classList.remove("on"));
+  ns.forEach((n) => n.classList.remove("on", "done"));
   let i = 0;
   (function nx() {
     if (i >= 5) {
       busy = 0;
       return;
     }
+    if (i > 0) ns[i - 1].classList.replace("on", "done");
     ns[i].classList.add("on");
     $("#cap").textContent = caps[i];
     i++;
@@ -165,7 +166,7 @@ function hud() {
         ? ROLE === "g" && i >= 2
           ? "Masuk dulu"
           : "Terkunci"
-        : l[0] + (done[i] ? " " + "\u2605".repeat(done[i]) : "")) +
+        : l[0] + (done[i] ? " · " + done[i] : "")) +
       "</small></button>"
     );
   }).join("");
@@ -478,14 +479,16 @@ function l5() {
 }
 function say(t) {
   const m = $("#mc");
-  $("#mb").textContent = t;
+  const b = $("#mb");
+  if (!m || !b) return;
+  b.textContent = t;
   m.classList.add("show");
   clearTimeout(say.t);
   say.t = setTimeout(() => m.classList.remove("show"), 6500);
 }
 function boom() {
   if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
-  const c = ["#0b4a38", "#b25a1c", "#d6e5bd"];
+  const c = ["#111111", "#f3f3f1", "#c8c8c8"];
   for (let i = 0; i < 48; i++) {
     const d = document.createElement("i");
     d.className = "cf";
@@ -585,6 +588,7 @@ const BG = [
     "riset",
     "saran",
     "tentang",
+    "admin",
   ];
 let IM = [],
   rt = 0,
@@ -612,14 +616,12 @@ function setRule(r) {
 function navs() {
   const a = document.querySelector('[data-go="kartu"]'),
     b = document.querySelector('[data-go="lacak"]');
-  a.textContent = done.slice(0, 5).every(Boolean)
-    ? "Kartu"
-    : "Kartu \uD83D\uDD12";
-  b.textContent = card() ? "Pelacak" : "Pelacak \uD83D\uDD12";
+  a.textContent = done.slice(0, 5).every(Boolean) ? "Kartu" : "Kartu tertutup";
+  b.textContent = card() ? "Pelacak" : "Pelacak tertutup";
   pj();
 }
 function route(p) {
-  if (!PG.includes(p)) p = "beranda";
+  if (!PG.includes(p) || !document.getElementById("p-" + p)) p = "beranda";
   {
     const nv = document.querySelector('.nav .l[data-go="' + p + '"]');
     if (nv && !nv.dataset.r.includes(ROLE)) p = "akses";
@@ -632,7 +634,31 @@ function route(p) {
     .forEach((b) =>
       b.setAttribute("aria-current", b.dataset.go === p ? "page" : "false"),
     );
-  scrollTo(0, 0);
+  const sec = document.getElementById("sec");
+  if (sec)
+    sec.textContent =
+      {
+        beranda: "Awal",
+        panduan: "Panduan",
+        model: "Model",
+        lab: "Lab",
+        misi: "Misi",
+        kartu: "Kartu",
+        lacak: "Pelacak",
+        log: "Log",
+        asesmen: "Asesmen",
+        riset: "Riset",
+        saran: "Saran",
+        tentang: "Tentang",
+        admin: "Admin",
+        akses: "Masuk",
+      }[p] || "";
+  scrollTo({
+    top: 0,
+    behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "auto"
+      : "instant",
+  });
   if (p === "kartu") kt();
   if (p === "lacak") trk();
   if (p === "asesmen") as();
@@ -1502,6 +1528,72 @@ function kg() {
   $("#g3").onclick = () => dl("laporan-green-ai.txt", rp(), "#gm");
 }
 async function rs() {
+  if (window.gailSupabase) {
+    $("#ra").hidden = true;
+    $("#sd").hidden = true;
+    const { data, error } = await window.gailSupabase
+      .from("research_results")
+      .select("participant_count,pre_scores,post_scores,notes,created_at")
+      .eq("is_published", true)
+      .order("created_at", { ascending: false });
+    const root = $("#rh");
+    root.replaceChildren();
+    if (error) {
+      const message = document.createElement("p");
+      message.className = "err";
+      message.textContent = `Hasil riset gagal dimuat: ${error.message}`;
+      root.append(message);
+      return;
+    }
+    if (!data?.length) {
+      const empty = document.createElement("div");
+      empty.className = "gate";
+      const title = document.createElement("h3");
+      title.textContent = "Hasil riset segera hadir";
+      const message = document.createElement("p");
+      message.textContent = "Tim peneliti belum menerbitkan hasil riset.";
+      empty.append(title, message);
+      root.append(empty);
+      return;
+    }
+    for (const result of data) {
+      if (
+        !Array.isArray(result.pre_scores) ||
+        !Array.isArray(result.post_scores) ||
+        result.pre_scores.length !== D.L.length ||
+        result.post_scores.length !== D.L.length
+      ) {
+        console.error("Hasil riset terbit memiliki format skor yang tidak valid.");
+        continue;
+      }
+      const article = document.createElement("article");
+      const title = document.createElement("h3");
+      title.textContent = `Hasil riset · ${result.participant_count} peserta`;
+      article.append(title);
+      const summary = document.createElement("p");
+      summary.textContent =
+        "Rata-rata skor Skala Literasi per dimensi (4 sampai 16).";
+      article.append(summary);
+      D.L.forEach((dimension, index) => {
+        const row = document.createElement("p");
+        row.textContent = `${dimension.d}: awal ${result.pre_scores[index]}, akhir ${result.post_scores[index]}`;
+        article.append(row);
+      });
+      if (result.notes) {
+        const notes = document.createElement("p");
+        notes.className = "mu";
+        notes.textContent = result.notes;
+        article.append(notes);
+      }
+      root.append(article);
+    }
+    if (!root.childElementCount) {
+      const message = document.createElement("p");
+      message.textContent = "Data hasil riset terbit belum memiliki format skor yang valid.";
+      root.append(message);
+    }
+    return;
+  }
   await cap();
   if (!DBc) {
     $("#rh").innerHTML =
@@ -1545,7 +1637,7 @@ async function rs() {
     $("#rc").value = d.cat || "";
   }
 }
-$("#rv").onclick = async () => {
+$("#rv")?.addEventListener("click", async () => {
   const pre = D.L.map((_, i) => +$("#r" + i).value),
     post = D.L.map((_, i) => +$("#q" + i).value);
   if ([...pre, ...post].some((x) => !(x >= 4 && x <= 16))) {
@@ -1565,14 +1657,18 @@ $("#rv").onclick = async () => {
   } catch (e) {
     $("#re").textContent = "Gagal menyimpan.";
   }
-};
+});
 async function sr() {
+  if (window.gailSupabase) {
+    $("#sd").hidden = true;
+    return;
+  }
   await cap();
   const adm = !!(USR && (await USR.canEdit()));
   $("#sd").hidden = !adm;
   if (adm && DBc) ld();
 }
-$("#sk").onclick = async () => {
+$("#sk")?.addEventListener("click", async () => {
   const v = (id) => $("#" + id).value.trim(),
     j = document.querySelector('input[name="sj"]:checked'),
     m = {
@@ -1588,6 +1684,25 @@ $("#sk").onclick = async () => {
     return;
   }
   $("#se").textContent = "";
+  if (window.gailSupabase) {
+    try {
+      const { error } = await window.gailSupabase.from("feedback").insert({
+        role: m.peran,
+        category: m.kat,
+        kind: m.jenis,
+        message: m.pesan,
+        name: m.nama,
+      });
+      if (error) throw error;
+      $("#sm").value = "";
+      $("#so").textContent = "Terima kasih! Masukanmu terkirim ke tim peneliti.";
+      $("#so").className = "ok";
+      say("Terima kasih atas masukanmu!");
+    } catch (error) {
+      $("#se").textContent = `Masukan gagal dikirim: ${error.message}`;
+    }
+    return;
+  }
   await cap();
   if (DBc && USR) {
     try {
@@ -1626,7 +1741,7 @@ $("#sk").onclick = async () => {
         '" target="_blank" rel="noopener">Kirim lewat email</a>'
       : "");
   $("#sx").value = tx;
-};
+});
 async function ld() {
   try {
     const q = await DBc.collection("saran").get();
@@ -1675,9 +1790,12 @@ function fl() {
     : '<p class="mu">Belum ada masukan yang cocok.</p>';
   window.FL = L;
 }
-["fk", "fp", "fj", "fo"].forEach((i) => ($("#" + i).onchange = fl));
-$("#fq").oninput = fl;
-$("#fx").onclick = () => {
+["fk", "fp", "fj", "fo"].forEach((i) => {
+  const filter = $("#" + i);
+  if (filter) filter.onchange = fl;
+});
+if ($("#fq")) $("#fq").oninput = fl;
+if ($("#fx")) $("#fx").onclick = () => {
   const c = (x) => '"' + String(x == null ? "" : x).replace(/"/g, '""') + '"';
   dl(
     "saran-green-ai.csv",
@@ -1768,9 +1886,6 @@ function gof() {
   go(Math.min(f < 0 ? 4 : f, ROLE === "g" ? 1 : 4));
 }
 function applyRole() {
-  document
-    .querySelectorAll(".nav .l")
-    .forEach((b) => (b.hidden = !b.dataset.r.includes(ROLE)));
   $("#me").textContent =
     ROLE === "g"
       ? ""
@@ -1788,7 +1903,7 @@ function tg() {
     document.querySelector('input[name="pr"]:checked').value !== "f";
 }
 document.querySelectorAll('input[name="pr"]').forEach((i) => (i.onchange = tg));
-$("#dcl").onclick = () => $("#dlg").close();
+$("#dcl")?.addEventListener("click", () => $("#dlg")?.close());
 $("#lgb").onclick = () => {
   if (ROLE !== "g") {
     ROLE = "g";
@@ -1803,7 +1918,7 @@ $("#lgb").onclick = () => {
   }
   op("s");
 };
-$("#ddn").onclick = async () => {
+$("#ddn")?.addEventListener("click", async () => {
   const r = document.querySelector('input[name="pr"]:checked').value,
     n = $("#dnm").value.trim();
   if (n.length < 2) {
@@ -1833,7 +1948,7 @@ $("#ddn").onclick = async () => {
   applyRole();
   say("Selamat datang, " + n + "!");
   route(r === "f" ? "panduan" : "beranda");
-};
+});
 function lgs() {
   try {
     return JSON.parse(localStorage.getItem("gall") || "[]");
@@ -1942,7 +2057,7 @@ function lgp() {
       }),
   );
 }
-$("#ga_s").onclick = () => {
+if ($("#ga_s")) $("#ga_s").onclick = () => {
   const v = (i) => $("#" + i).value.trim(),
     e = {
       t: Date.now(),
@@ -1971,7 +2086,7 @@ $("#ga_s").onclick = () => {
   say("Catatan tersimpan.");
   lgp();
 };
-$("#ga_x").onclick = () => {
+if ($("#ga_x")) $("#ga_x").onclick = () => {
   const c = (x) => '"' + String(x == null ? "" : x).replace(/"/g, '""') + '"';
   dl(
     "log-penggunaan-ai.csv",
@@ -2166,12 +2281,9 @@ function rvi() {
       if (e.dataset.rv) return;
       e.dataset.rv = 1;
       e.classList.add("rv");
-      e.style.transitionDelay = Math.min(i, 8) * 60 + "ms";
-      rm
-        ? e.classList.add("in")
-        : requestAnimationFrame(() =>
-            requestAnimationFrame(() => e.classList.add("in")),
-          );
+      e.style.transitionDelay = Math.min(i % 5, 4) * 70 + "ms";
+      if (rm) e.classList.add("in");
+      else if (window.nolReveal) window.nolReveal(e);
     });
 }
 function cv() {
